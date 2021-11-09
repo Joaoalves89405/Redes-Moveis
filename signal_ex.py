@@ -1,3 +1,4 @@
+import os
 import sys, random
 import matplotlib.pyplot as plt
 import numpy as np
@@ -86,7 +87,17 @@ def product_modulation(signal, spreading_code, spreading_factor):
 
 def file_information(CDMA_signal, message, spreading_code, spreading_factor):
 	try:
-		f = open("info.txt", "w")
+		path = "C:/Users/jmca-/OneDrive/Ambiente de Trabalho/João Miguel"
+		os.chdir(path)
+
+		for file in os.listdir():
+    		# Check whether file is in text format or not
+    			if file.endswith(".txt"):
+        			file_path = f"{path}\{file}"
+				
+				
+		f= open(file_path, "w") 	
+
 		for bit in CDMA_signal:
 			f.write("%s;" % str(bit))
 		f.write("\n")
@@ -109,7 +120,7 @@ def get_information(file):
 
 def interpret_line(line):
 	
-	for element in lines:
+	for element in line:
 		element = element.strip(";")
 
 
