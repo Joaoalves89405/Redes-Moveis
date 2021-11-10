@@ -93,7 +93,7 @@ def file_information(file ,CDMA_signal, message, spreading_code, spreading_facto
 		# for file in os.listdir():
   #   		# Check whether file is in text format or not
   #   			if file.endswith(".txt"):
-  #       			file_path = f"{path}/{file}"
+  #       			file_path = f"{path}\{file}"
 				
 
 		with open(file, 'w') as f:
@@ -112,19 +112,22 @@ def file_information(file ,CDMA_signal, message, spreading_code, spreading_facto
 #CHANNEL
 
 def add_atenuation(signal):
-	attenuation_factor = rng.uniform(0,1)
+	attenuation_factor = rng.uniform(0.4,1)
 	res = []
-	print(attenuation_factor)
 	for bit in signal:
-		res.append(int(bit) * attenuation_factor)
+		res.append(bit * attenuation_factor)
 
 	return res
 
-def add_whitenoise():
+def add_whitenoise(signal, noise_deviation):
 
-	for i in range(10):
-		normal = rng.normal(1)
-		print (normal)
+	res = []
+	for bit in signal:
+		normal = rng.normal(0, noise_deviation)
+		
+		res.append(bit+normal)
+	print('NOISE %s' % res)
+	return res
 
 
 
@@ -132,23 +135,16 @@ def add_whitenoise():
 #RECEIVER
 
 def get_information(file, index):
+	res = []
 	with open(file, "r") as f: 
 		lines = f.read().splitlines()
-	return lines[index].split(',')
+	line = lines[index].split(',')
+	for bit in line:
+		res.append(float(bit)) 
+
+	return res
 
 
-	# if index == 0:
-	# 	dcma_sig = line.strip(',')
-	# 	return dcma_sig
-	# elif index == 1:
-	# 	message = line.strip(',')
-	# 	return message
-	# elif index == 2:
-	# 	spreading_code = line.strip(',')
-	# 	return spreading_code
-	# elif index == 3:
-	# 	spreading_factor = line
-	# 	return spreading_factor
 
 
 if __name__ == "__main__":
@@ -157,34 +153,41 @@ if __name__ == "__main__":
 	spreading_factor = int(sys.argv[3])
 	sc_size = int(sys.argv[4])
 
-	fig,(ax1,ax2,ax3, ax4) = plt.subplots(4)
+	fig,(ax1,ax2,ax3,ax4) = plt.subplots(4)
 
 	ss_code = random_bit_message(sc_size)
 	print(ss_code)
-	ss_fs = Fs*spreading_factor
-	ss_size = n_bits*spreading_factor
 
 	message = random_bit_message(n_bits)
 	signal = generate_signal(message, Fs)
 	sig_limited = np.array(setNRZLevels(signal))
-	# ss = spreading_sequence(ss_size, sc_size, ss_fs)
-	# ss_limited = np.array(setNRZLevels(ss))
 	
 	output = product_modulation(setNRZLevels(signal),setNRZLevels(ss_code), spreading_factor)
-	#print("OUTPUT")
-	#print(output)
+	file_information("transmited.txt",output, signal, ss_code, spreading_factor)
+	
 
-	file_information("info.txt",output, signal, ss_code, spreading_factor)
-	cdma_sig = get_information("info.txt", 0)
+
+	############ CHANNEL ###############
+	print("OUPTUT %s" % output)
+	cdma_sig = get_information("transmited.txt", 0)
 	at_cdma_sig = add_atenuation(cdma_sig)
-	add_whitenoise()
+	final_sig = add_whitenoise(at_cdma_sig, 0.1)
+	channel_sig = []
+	for bit in final_sig:
+		channel_sig.append("{:.2f}".format(bit))
+	file_information("channel.txt",channel_sig, message, ss_code, spreading_factor)
 
-	received = product_modulation(setNRZLevels(output), setNRZLevels(ss_code),1)
+	########### RECEIVER ###############
+	recv_cdma = get_information('channel.txt', 0)
+	recv_message =  product_modulation(recv_cdma, setNRZLevels(ss_code),1)
+
+
+
+	#received = product_modulation(setNRZLevels(output), setNRZLevels(ss_code),1)
 
 	show_signal(sig_limited, "Original Signal",ax1)
-	#show_signal(ss_limited, "Spreading Sequence")
-	show_signal(output, "Final output",ax2)
-	show_signal(received, "Received signal",ax3)
-	show_signal(at_cdma_sig, "Attenuatted CDMA_signal",ax4)
+	show_signal(output, "Transmited Signal",ax2)
+	show_signal(recv_cdma, "Received Signal",ax3)
+	show_signal(recv_message, "Final received message", ax4)
 
 	plt.show() 
