@@ -1,8 +1,9 @@
-import os
-import sys, random
+import os,sys
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy.random import default_rng
 
+rng = default_rng()
 plt.rcParams["figure.figsize"] = [8, 6]
 plt.rcParams["figure.autolayout"] = True
 
@@ -12,17 +13,17 @@ def random_bit_message(n_bits):
 	
 	bit_message = []
 	for i in range(0, n_bits):
-		bit = random.choice([0,1])
+		bit = rng.choice([0,1])
 		bit_message.append(bit)
 	return bit_message
 
 def setNRZLevels(signal):
 	new_sig = []
 	for bit in signal:
-		if(bit == 0 or bit ==-1.0):
-			new_sig.append(-1.0)
+		if(bit == 0 or bit ==-1):
+			new_sig.append(-1)
 		else:
-			new_sig.append(1.0) 
+			new_sig.append(1) 
 	return new_sig
 
 def generate_signal(message, Fs):
@@ -85,43 +86,69 @@ def product_modulation(signal, spreading_code, spreading_factor):
 	#print(pm_signal)
 	return pm_signal
 
-def file_information(CDMA_signal, message, spreading_code, spreading_factor):
-	try:
-		path = "C:/Users/jmca-/OneDrive/Ambiente de Trabalho/João Miguel"
-		os.chdir(path)
+def file_information(file ,CDMA_signal, message, spreading_code, spreading_factor):
+		# path = ""
+		# os.chdir(path)
 
-		for file in os.listdir():
-    		# Check whether file is in text format or not
-    			if file.endswith(".txt"):
-        			file_path = f"{path}\{file}"
+		# for file in os.listdir():
+  #   		# Check whether file is in text format or not
+  #   			if file.endswith(".txt"):
+  #       			file_path = f"{path}/{file}"
 				
-				
-		f= open(file_path, "w") 	
 
-		for bit in CDMA_signal:
-			f.write("%s;" % str(bit))
-		f.write("\n")
-		for bit in message:
-			f.write("%s;" % str(bit))
-		f.write("\n")
-		for bit in spreading_code:
-			f.write("%s;" % str(bit))
-		f.write("\n")
-		f.write(str(spreading_factor))
-		f.write("\n")
-	finally:
-		f.close()
+		with open(file, 'w') as f:
+			for bit in CDMA_signal[:-1]:
+				f.write("%s," % str(bit))
+			f.write("%s\n" % str(CDMA_signal[-1]))
+			for bit in message[:-1]:
+				f.write("%s," % str(bit))
+			f.write("%s\n" % str(message[-1]))
+			for bit in spreading_code[:-1]:
+				f.write("%s," % str(bit))
+			f.write("%s\n" % str(spreading_code[-1]))
+			f.write(str(spreading_factor))
+			f.write("\n")
+
+#CHANNEL
+
+def add_atenuation(signal):
+	attenuation_factor = rng.uniform(0,1)
+	res = []
+	print(attenuation_factor)
+	for bit in signal:
+		res.append(int(bit) * attenuation_factor)
+
+	return res
+
+def add_whitenoise():
+
+	for i in range(10):
+		normal = rng.normal(1)
+		print (normal)
+
+
+
 
 #RECEIVER
 
-def get_information(file):
-	with open("info.txt", "r") as f: 
+def get_information(file, index):
+	with open(file, "r") as f: 
 		lines = f.read().splitlines()
+	return lines[index].split(',')
 
-def interpret_line(line):
-	
-	for element in line:
-		element = element.strip(";")
+
+	# if index == 0:
+	# 	dcma_sig = line.strip(',')
+	# 	return dcma_sig
+	# elif index == 1:
+	# 	message = line.strip(',')
+	# 	return message
+	# elif index == 2:
+	# 	spreading_code = line.strip(',')
+	# 	return spreading_code
+	# elif index == 3:
+	# 	spreading_factor = line
+	# 	return spreading_factor
 
 
 if __name__ == "__main__":
@@ -130,7 +157,7 @@ if __name__ == "__main__":
 	spreading_factor = int(sys.argv[3])
 	sc_size = int(sys.argv[4])
 
-	fig,(ax1,ax2,ax3) = plt.subplots(3)
+	fig,(ax1,ax2,ax3, ax4) = plt.subplots(4)
 
 	ss_code = random_bit_message(sc_size)
 	print(ss_code)
@@ -147,7 +174,10 @@ if __name__ == "__main__":
 	#print("OUTPUT")
 	#print(output)
 
-	file_information(output, signal, ss_code, spreading_factor)
+	file_information("info.txt",output, signal, ss_code, spreading_factor)
+	cdma_sig = get_information("info.txt", 0)
+	at_cdma_sig = add_atenuation(cdma_sig)
+	add_whitenoise()
 
 	received = product_modulation(setNRZLevels(output), setNRZLevels(ss_code),1)
 
@@ -155,5 +185,6 @@ if __name__ == "__main__":
 	#show_signal(ss_limited, "Spreading Sequence")
 	show_signal(output, "Final output",ax2)
 	show_signal(received, "Received signal",ax3)
+	show_signal(at_cdma_sig, "Attenuatted CDMA_signal",ax4)
 
 	plt.show() 
