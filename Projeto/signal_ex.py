@@ -1,6 +1,7 @@
 import os,sys
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy.core.fromnumeric import size
 from numpy.random import default_rng
 
 rng = default_rng()
@@ -145,6 +146,18 @@ def get_information(file, index):
 	return res
 
 
+#BER
+
+def signal_comp(output, recv_message):
+	dif = 0
+	for bit in output:
+		if output[bit] != recv_message[bit]:
+			dif = dif + 1
+
+	print(dif)
+	print(len(sig_limited))
+	print("DIF=",dif/len(sig_limited))
+	return dif/len(sig_limited)			
 
 
 if __name__ == "__main__":
@@ -180,6 +193,8 @@ if __name__ == "__main__":
 	########### RECEIVER ###############
 	recv_cdma = get_information('channel.txt', 0)
 	recv_message =  product_modulation(recv_cdma, setNRZLevels(ss_code),1)
+	ber = signal_comp(output, recv_message)
+
 
 
 
