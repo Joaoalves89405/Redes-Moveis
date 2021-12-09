@@ -33,10 +33,10 @@ def generate_signal(message, Fs):
 		for i in range(Fs):
 			sig.append(bit)
 		pass
-	print("Original data:")
-	print(message)
-	print("Data sampled at "+str(Fs)+" samples/bit. "+ str(len(sig)))
-	print(sig)
+	# print("Original data:")
+	# print(message)
+	# print("Data sampled at "+str(Fs)+" samples/bit. "+ str(len(sig)))
+	# print(sig)
 	return(sig)
 
 def show_signal(signal, title, axs):
@@ -50,22 +50,18 @@ def show_signal(signal, title, axs):
 	axs.set_ylabel("Amplitude")
 
 
-def spreading_sequence(ss_size, spreading_code_size, ss_sampling_factor):
-	ss_code = random_bit_message(spreading_code_size)
+def spreading_sequence(ss_size, spreading_code, ss_sampling_factor):
 	ss = []
 	count = 0
 	i=0
 
-	print(ss_code)
-
-
+	
 	while count != ss_size:
-		ss.append(ss_code[i])
+		ss.append(spreading_code[i])
 		count+=1
 		i+=1
-		if(i==spreading_code_size):
+		if(i==len(spreading_code)):
 			i=0
-
 	ssg = generate_signal(ss, ss_sampling_factor )
 	return ssg 
 
@@ -80,16 +76,21 @@ def product_modulation(signal, spreading_code, spreading_factor, chip_rate):
 				i=0
 			for chip in range(chip_rate):
 				pm_signal.append(bit*spreading_code[i])
-				
 			i+=1
+	return pm_signal
 
-			
+def product_modulation_r(signal, spreading_sequence):
+
+	result_sig=[]
+	for idx in range(len(signal)):
+		result_sig.append(signal[idx]*spreading_sequence[idx])
+	return result_sig			
 
 	#print("THIS IS THE PRODUCT OF THE SIGNAL:")
 	#print(pm_signal)
 	return pm_signal
 
-def file_information(file ,CDMA_signal, message, spreading_code, spreading_factor):
+def file_information(file, writing_mode, CDMA_signal, message, spreading_code, spreading_factor):
 		# path = ""
 		# os.chdir(path)
 
@@ -99,7 +100,7 @@ def file_information(file ,CDMA_signal, message, spreading_code, spreading_facto
   #       			file_path = f"{path}\{file}"
 				
 
-		with open(file, 'w') as f:
+		with open(file, writing_mode) as f:
 			for bit in CDMA_signal[:-1]:
 				f.write("%s," % str(bit))
 			f.write("%s\n" % str(CDMA_signal[-1]))
@@ -114,12 +115,11 @@ def file_information(file ,CDMA_signal, message, spreading_code, spreading_facto
 
 #CHANNEL
 
-def add_atenuation(signal):
-	attenuation_factor = rng.uniform(1,1)
+def add_atenuation(signal, atenuation_level):
+	attenuation_factor = rng.uniform(1-atenuation_level,1)
 	res = []
 	for bit in signal:
 		res.append(bit * attenuation_factor)
-
 	return res
 
 def add_whitenoise(signal, noise_deviation):
@@ -143,7 +143,12 @@ def get_information(file, index):
 		lines = f.read().splitlines()
 	line = lines[index].split(',')
 	for bit in line:
-		res.append(float(bit)) 
+		if index == 0 :
+			res.append(float(bit))
+		elif index == 3:
+			res.append(bit)
+		else:
+			res.append(int(bit)) 
 
 	return res
 
@@ -152,38 +157,36 @@ def get_information(file, index):
 
 def signal_comp(output, recv_message):
 	dif = 0
-	for bit in output:
+	for bit in range(len(output)):
 		if output[bit] != recv_message[bit]:
 			dif = dif + 1
 
 	print(dif)
-	print(len(sig_limited))
-	print("DIF=",dif/len(sig_limited))
-	return dif/len(sig_limited)			
+	print(len(output))
+	print("DIF= ",(dif/len(output))*100)
+	return dif/len(output)			
+
+
+def integrate_signal(signal, Fs):
+	result_sig=[]
+	res = 0
+	i=1
+	for bit in signal:
+		if i != Fs:
+			res += bit
+			i+=1
+		else:
+			i=1
+			res = res/Fs
+			if res < 0:
+				result_sig.append(0)
+			else:
+				result_sig.append(1)
+	return result_sig
 
 
 if __name__ == "__main__":
-	n_bits = int(sys.argv[1])
-	chip_rate = int(sys.argv[2])
-	spreading_factor = int(sys.argv[3])
-	sc_size = int(sys.argv[4])
-	Fs = chip_rate*spreading_factor
-
-	fig,(ax1,ax2,ax3,ax4) = plt.subplots(4)
-
-	ss_code = random_bit_message(sc_size)
-	print(ss_code)
-
-	message = random_bit_message(n_bits)
-	signal = generate_signal(message, Fs)
-	sig_limited = np.array(setNRZLevels(signal))
-
-	print("Length initial sig", len(signal))
 	
-	output = product_modulation(setNRZLevels(signal),setNRZLevels(ss_code), spreading_factor, chip_rate)
-	file_information("transmited.txt",output, signal, ss_code, spreading_factor)
-	print("Length output sig", len(output))
-
 
 	############ CHANNEL ###############
 	print("OUPTUT %s" % output)
@@ -196,12 +199,7 @@ if __name__ == "__main__":
 	file_information("channel.txt",channel_sig, message, ss_code, spreading_factor)
 
 	########### RECEIVER ###############
-	recv_cdma = get_information('channel.txt', 0)
-	print("RECV CDMA: ", len(recv_cdma))
-	recv_message =  product_modulation(recv_cdma, setNRZLevels(ss_code),1,chip_rate)
-	ber = signal_comp(output, recv_message)
-	print("Recv message length =", len(recv_message))
-
+	
 
 
 
