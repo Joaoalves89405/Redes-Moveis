@@ -163,7 +163,6 @@ def signal_comp(output, recv_message):
 
 	print(dif)
 	print(len(output))
-	print("DIF= ",(dif/len(output))*100)
 	return dif/len(output)			
 
 

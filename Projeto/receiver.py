@@ -30,8 +30,7 @@ if __name__ == '__main__':
 	print("INITIAL message: ", len(initial_message))
 	print("result_message: ", len(result_message))
 	ber = bf.signal_comp(initial_message, result_message)
-	print("Recv message length =", len(result_message))
-	print("Bit error rate= ", ber )
+	print("Bit error rate= ", ber*100)
 
 
 	bf.show_signal(recv_cdma, "Received Signal",ax3)
