@@ -10,7 +10,7 @@ if __name__ == '__main__':
 	spreading_factor = bf.get_information(file_to_read,3)
 
 	at_cdma_sig = bf.add_atenuation(cdma_sig, 0.8)
-	final_sig = bf.add_whitenoise(at_cdma_sig, 0.5)
+	final_sig = bf.add_whitenoise(at_cdma_sig, 0.01)
 	channel_sig = []
 	for bit in final_sig:
 		channel_sig.append("{:.2f}".format(bit))
