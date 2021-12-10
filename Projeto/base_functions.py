@@ -184,30 +184,3 @@ def integrate_signal(signal, Fs):
 				result_sig.append(1)
 	return result_sig
 
-
-if __name__ == "__main__":
-	
-
-	############ CHANNEL ###############
-	print("OUPTUT %s" % output)
-	cdma_sig = get_information("transmited.txt", 0)
-	at_cdma_sig = add_atenuation(cdma_sig)
-	final_sig = add_whitenoise(at_cdma_sig, 0.0)
-	channel_sig = []
-	for bit in final_sig:
-		channel_sig.append("{:.2f}".format(bit))
-	file_information("channel.txt",channel_sig, message, ss_code, spreading_factor)
-
-	########### RECEIVER ###############
-	
-
-
-
-	#received = product_modulation(setNRZLevels(output), setNRZLevels(ss_code),1)
-
-	show_signal(sig_limited, "Original Signal",ax1)
-	show_signal(output, "Transmited Signal",ax2)
-	show_signal(recv_cdma, "Received Signal",ax3)
-	show_signal(recv_message, "Final received message", ax4)
-
-	plt.show() 
