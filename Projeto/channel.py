@@ -2,12 +2,14 @@ import base_functions as bf
 
 if __name__ == '__main__':
 
-	file_to_read = 'transmited.txt'
+	files_to_read = ['transmited1.txt', 'transmited2.txt','transmited3.txt']
 
-	cdma_sig = bf.get_information(file_to_read, 0)
-	initial_message = bf.get_information(file_to_read,1)
-	spreading_code = bf.get_information(file_to_read,2)
-	spreading_factor = bf.get_information(file_to_read,3)
+	
+
+	cdma_sig = bf.get_information(files_to_read, 0)
+	initial_message = bf.get_information(files_to_read,1)
+	spreading_code = bf.get_information(files_to_read,2)
+	spreading_factor = bf.get_information(files_to_read,3)
 
 	at_cdma_sig = bf.add_atenuation(cdma_sig, 0.8)
 	final_sig = bf.add_whitenoise(at_cdma_sig, 2)

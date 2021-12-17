@@ -26,7 +26,7 @@ if __name__ == '__main__':
 	
 	output = bf.product_modulation(bf.setNRZLevels(signal),bf.setNRZLevels(ss_code), spreading_factor, chip_rate)
 	print(output) 
-	bf.file_information("transmited.txt", "w", output, signal, ss_code, spreading_factor)
+	bf.file_information("transmited3.txt", "w", output, signal, ss_code, spreading_factor)
 	print("Length output sig", len(output))
 
 
