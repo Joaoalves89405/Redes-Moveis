@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy.core.fromnumeric import size
 from numpy.random import default_rng
+import math
+from sympy import fwht
 
 rng = default_rng()
 plt.rcParams["figure.figsize"] = [8, 6]
@@ -18,6 +20,23 @@ def random_bit_message(n_bits):
 		bit_message.append(bit)
 	return bit_message
 
+def get_walsh_codes(number_of_users):
+	walsh_order = int(math.ceil(math.log(number_of_users,2)+float(0.01)))
+	wcodes = walsh_code(walsh_order)
+	not_code = [0]*len(wcodes)
+	w_codes = wcodes.tolist()
+	w_codes_usable = w_codes.remove(not_code)
+	return w_codes
+
+def walsh_code(order):
+    #basic element(order) of walsh code generator
+    W = np.array([0])
+    for i in range(order):
+        W = np.tile(W, (2, 2))
+        half = 2**i
+        W[half:, half:] = np.logical_not(W[half:, half:])
+    return W
+	
 def setNRZLevels(signal):
 	new_sig = []
 	for bit in signal:
@@ -101,9 +120,10 @@ def file_information(file, writing_mode, CDMA_signal, message, spreading_code, s
 				
 
 		with open(file, writing_mode) as f:
-			for bit in CDMA_signal[:-1]:
-				f.write("%s," % str(bit))
-			f.write("%s\n" % str(CDMA_signal[-1]))
+			if CDMA_signal != None:
+				for bit in CDMA_signal[:-1]:
+					f.write("%s," % str(bit))
+				f.write("%s\n" % str(CDMA_signal[-1]))
 			for bit in message[:-1]:
 				f.write("%s," % str(bit))
 			f.write("%s\n" % str(message[-1]))
