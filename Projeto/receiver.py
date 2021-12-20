@@ -40,6 +40,7 @@ if __name__ == '__main__':
 		spreading_factor=signal_info[3]
 
 		Fs = int(len(recv_cdma)/len(initial_message))
+		print(Fs)
 		chip_rate = int(int(Fs)/int(spreading_factor[0]))
 		ss = bf.spreading_sequence(len(recv_cdma), spreading_code, chip_rate)
 		ss_nrz = bf.setNRZLevels(ss)
@@ -51,10 +52,10 @@ if __name__ == '__main__':
 
 		print("INITIAL message: ", len(initial_message))
 		print("result_message: ", len(result_message))
-		print("Bit error rate= ", ber)
+		print("Bit error rate= "+ str(ber*100)+"%")
 		bf.show_signal(recv_cdma, "Received Signal",ax3)
-		bf.show_signal(result_message, "Final received message", ax4)
-		bf.show_signal(result_message, "Message Received", ax5)
+		bf.show_signal(initial_message, "Original Message", ax4)
+		bf.show_signal(result_message, "Final received message", ax5)
 
 
 		plt.show() 

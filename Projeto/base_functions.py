@@ -1,14 +1,19 @@
 import os,sys
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 from numpy.core.fromnumeric import size
 from numpy.random import default_rng
-import math
 from sympy import fwht
+from sp.gold import gold
 
 rng = default_rng()
 plt.rcParams["figure.figsize"] = [8, 6]
 plt.rcParams["figure.autolayout"] = True
+preferred_pairs = {5:[[2],[1,2,3]], 6:[[5],[1,4,5]], 7:[[4],[4,5,6]],
+                        8:[[1,2,3,6,7],[1,2,7]], 9:[[5],[3,5,6]], 
+                        10:[[2,5,9],[3,4,6,8,9]], 11:[[9],[3,6,9]]}
+
 
 
 
@@ -22,13 +27,13 @@ def random_bit_message(n_bits):
 
 def get_walsh_codes(number_of_users):
 	walsh_order = int(math.ceil(math.log(number_of_users,2)+float(0.01)))
-	wcodes = walsh_code(walsh_order)
+	wcodes = walsh(walsh_order)
 	not_code = [0]*len(wcodes)
 	w_codes = wcodes.tolist()
-	w_codes_usable = w_codes.remove(not_code)
+	w_codes.remove(not_code)
 	return w_codes
 
-def walsh_code(order):
+def walsh(order):
     #basic element(order) of walsh code generator
     W = np.array([0])
     for i in range(order):
@@ -36,6 +41,59 @@ def walsh_code(order):
         half = 2**i
         W[half:, half:] = np.logical_not(W[half:, half:])
     return W
+
+def bool2list(bool):
+	pass
+
+def get_gold_codes(number_of_users):
+	code_order = int(math.ceil(math.log(number_of_users,2)+float(0.01)))+1
+	codes = gold(5)
+	a_codes = np.array(codes)
+	u_codes = (a_codes.astype(int)).tolist()
+	print(len(u_codes))
+	print(len(u_codes[0]))
+
+	not_code = [0]*len(codes[0])
+	try:
+		u_codes.remove(not_code)
+	except:
+		pass
+	return u_codes 
+
+#----------------> Gold Codes from http://mubeta06.github.io/python/sp/
+
+# def lfsr(taps, buf):
+#     """Function implements a linear feedback shift register
+#     taps:   List of Polynomial exponents for non-zero terms other than 1 and n
+#     buf:    List of buffer initialisation values as 1's and 0's or booleans
+#     """
+#     nbits = len(buf)
+#     sr = numpy.array(buf, dtype='bool')
+#     out = []
+#     for i in range((2**nbits)-1):
+#         feedback = sr[0]
+#         out.append(feedback)
+#         for t in taps:
+#             feedback ^= sr[t]
+#         sr = numpy.roll(sr, -1)
+#         sr[-1] = feedback
+#     return out
+
+# def gold(n):
+#     """Generate a set of 2^n +1 Gold Codes
+#     """
+#     n = int(n)
+#     if not n in preferred_pairs:
+#         print('preferred pairs for %s bits unknown' % str(n)) 
+#     seed = list(np.ones(n))
+#     seq1 = lfsr(preferred_pairs[n][0], seed)
+#     seq2 = lfsr(preferred_pairs[n][1], seed)
+#     gold = [seq1, seq2]
+#     for shift in range(len(seq1)):
+#         gold.append(numpy.logical_xor(seq1, numpy.roll(seq2, -shift)))
+#     return gold
+
+#--------------------------------------------------------------------------
 	
 def setNRZLevels(signal):
 	new_sig = []

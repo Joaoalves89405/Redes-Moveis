@@ -1,0 +1,14 @@
+cycler==0.11.0
+fonttools==4.28.4
+kiwisolver==1.3.2
+matplotlib==3.5.1
+mpmath==1.2.1
+numpy==1.21.4
+packaging==21.3
+Pillow==8.4.0
+pkg_resources==0.0.0
+pyparsing==3.0.6
+python-dateutil==2.8.2
+six==1.16.0
+-e git+https://github.com/mubeta06/python.git@17438ce4914f09ca076aa89167f95ea775b411dd#egg=sp&subdirectory=signal_processing
+sympy==1.9

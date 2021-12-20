@@ -37,5 +37,5 @@ if __name__ == '__main__':
 			for indx, bit in enumerate(cdma_sig):
 				signal_sum[indx] = bit+signal_sum[indx]
 			bf.file_information('temp.txt','a',None,initial_message, spreading_code,spreading_factor[0])
-	add_channel_effects(signal_sum, 0.1, 0.3)
+	add_channel_effects(signal_sum, atenuation=0.6, whitenoise=0.3)
 	

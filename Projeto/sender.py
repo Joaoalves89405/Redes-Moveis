@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sympy import fwht
 
-n_bits = 20
+n_bits = 10
 chip_rate = 2
 spreading_factor = 4
 sc_size = 6
@@ -15,14 +15,15 @@ if __name__ == '__main__':
 	nr_sinais = int(input("Numero de sinais: "))
 
 	Fs = chip_rate*spreading_factor
-	wc = bf.get_walsh_codes(nr_sinais)
-	print(wc)
+	gc = bf.get_walsh_codes(nr_sinais)
+	#gc = bf.get_gold_codes(nr_sinais)
+	print(gc)
 
 
 	for users in range(nr_sinais):
 		fig,(ax1,ax2) = plt.subplots(2)
 		path_file = ("./transmited/transmited"+str(users+1)+".txt")
-		ss_code = wc[users]
+		ss_code = gc[users]
 		message = bf.random_bit_message(n_bits)
 		signal = bf.generate_signal(message, Fs)
 		sig_limited = np.array(bf.setNRZLevels(signal))
